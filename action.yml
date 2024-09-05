@@ -16,6 +16,12 @@ inputs:
     description: 'JSON string containing workflow config parameters.'
     required: true
 
+  testing-enabled:
+    type: boolean
+    description: 'Enable or disable testing.'
+    required: true
+    default: true
+
 runs:
   using: "composite"
   steps:
@@ -37,10 +43,10 @@ runs:
           exit 1
         fi
         echo ""
-        echo "${{ fromJson(inputs.config-json).RETENTION_DAYS }}"
+        echo "${{ inputs.testing-enabled }}"
 
     - name: Set-up JAVA environment
-      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'enabled' }}
+      if: ${{ inputs.technology == 'maven' && inputs.testing-enabled == 'true' }}
       uses: actions/setup-java@v4
       with:
         distribution: ${{ fromJson(inputs.config-json).JAVA_DISTRIBUTION }}
@@ -48,7 +54,7 @@ runs:
 
     - name: Test maven project
       id: test-maven
-      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'enabled' }}
+      if: ${{ inputs.technology == 'maven' && inputs.testing-enabled == 'true' }}
       shell: bash
       run: |
         echo "Testing maven project..."
@@ -65,14 +71,14 @@ runs:
         fi
 
     - name: Set-up Python environment
-      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == 'enabled' }}
+      if: ${{ inputs.technology == 'python' && inputs.testing-enabled == 'true' }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ fromJson(inputs.config-json).PYTHON_VERSION }}
 
     - name: Test python project
       id: test-python
-      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == 'enabled' }}
+      if: ${{ inputs.technology == 'python' && inputs.testing-enabled == 'true' }}
       shell: bash
       run: |
         echo "Testing python project..."
@@ -89,14 +95,14 @@ runs:
         fi
 
     - name: Set-up Node environment
-      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == 'enabled' }}
+      if: ${{ inputs.technology == 'node' && inputs.testing-enabled == 'true' }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ fromJson(inputs.config-json).NODE_VERSION }} 
 
     - name: Test node project
       id: test-node
-      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == 'enabled' }}
+      if: ${{ inputs.technology == 'node' && inputs.testing-enabled == 'true' }}
       shell: bash
       run: |
         echo "Testing node project..."
@@ -115,7 +121,7 @@ runs:
 
     - name: Skipping test
       id: skip
-      if: ${{ fromJson(inputs.config-json).TESTING == 'false' }}
+      if: ${{ inputs.testing-enabled == 'false' }}
       shell: bash
       run: |
         echo "Skipping test..."
