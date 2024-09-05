@@ -1,39 +1,122 @@
-name: 'GAWG Validate Build'
-description: 'This actiosn belogns to the GAWG workflow and is used to validate the configurations, Dockerfile, secrets, deployment, and runner.'
+name: 'GAWG Test action'
+description: 'This action checks the technology used in the project (Python or Node.js), performs a test operation.'
 author: Álvaro García Pizarro
 branding:
-  icon: 'settings'
+  icon: 'thermometer'
   color: 'gray-dark'
 
 inputs:
   technology:
     type: string
-    description: 'Repository name with owner. For example, actions/checkout'
+    description: 'Technology to use for the build. Avaliable options: maven, python, node, gradle.'
+    required: true
 
-  docker:
-    type: boolean
-    description: 'Flag to validate the Dockerfile.'
-    default: false
-
-  self-hosted-runner:
-    type: boolean
-    description: 'Flag to validate the self-hosted runner.'
-    default: false
-
-  deployment:
+  config-json:
     type: string
-    description: 'Deployment type. For example, kubernetes, helm, etc.'
-
-outputs:
-  test:
-    description: "test"
-    value: ${{ steps.test.outputs.random-number }}
+    description: 'JSON string containing workflow config parameters.'
+    required: true
 
 runs:
   using: "composite"
-  id: test
   steps:
-    - name: Test
+    - name: Validate technology
       shell: bash
       run: |
-        echo "random-number=$(echo $RANDOM)" >> $GITHUB_OUTPUT
+        echo ""
+        echo "========================================= TECHNOLOGY VALIDATION =========================================="
+        TECHNOLOGIES=("python" "node" "maven")
+        if [[ " ${TECHNOLOGIES[@]} " =~ " ${{ inputs.technology }} " ]]; then
+          echo "✅ ${{ inputs.technology }} is a valid technology."
+          echo "## Test status information" >> $GITHUB_STEP_SUMMARY
+          echo "✅ ${{ inputs.technology }} technology validation PASSED." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Error: ${{ inputs.technology }} is not a valid technology."
+          echo "::error:: ❌ Error: ${{ inputs.technology }} is not a valid technology."
+          echo "## Test status information" >> $GITHUB_STEP_SUMMARY
+          echo "❌ ${{ inputs.technology }} technology validation FAILED." >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        echo ""
+
+    - name: Set-up JAVA environment
+      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'true' }}
+      uses: actions/setup-java@v4
+      with:
+        distribution: ${{ fromJson(inputs.config-json).JAVA_DISTRIBUTION }}
+        java-version: ${{ fromJson(inputs.config-json).JAVA_VERSION }}
+
+    - name: Test maven project
+      id: test-maven
+      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'true' }}
+      shell: bash
+      run: |
+        echo "Testing maven project..."
+        output=$(mvn test 2>&1)
+        status=$?
+        echo "$output"
+        if [ $status -eq 0 ]; then
+          echo "✅ Maven Test Status: SUCCESS"
+          echo "✅ Maven Test Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Maven Test Status: FAILED"
+          echo "❌ Maven Test Status: FAILED" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+
+    - name: Set-up Python environment
+      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == 'true' }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ fromJson(inputs.config-json).PYTHON_VERSION }}
+
+    - name: Test python project
+      id: test-python
+      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == 'true' }}
+      shell: bash
+      run: |
+        echo "Testing python project..."
+        output=$(python3 -m pip install -r requirements.txt && python3 -m unittest discover 2>&1)
+        status=$?
+        echo "$output"
+        if [ $status -eq 0 ]; then
+          echo "✅ Python Test Status: SUCCESS"
+          echo "✅ Python Test Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Python Test Status: FAILED"
+          echo "❌ Python Test Status: FAILED" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+
+    - name: Set-up Node environment
+      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == 'true' }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ fromJson(inputs.config-json).NODE_VERSION }} 
+
+    - name: Test node project
+      id: test-node
+      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == 'true' }}
+      shell: bash
+      run: |
+        echo "Testing node project..."
+        npm install
+        output=$(npm test 2>&1)
+        status=$?
+        echo "$output"
+        if [ $status -eq 0 ]; then
+          echo "✅ Node Test Status: SUCCESS"
+          echo "✅ Node Test Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Node Test Status: FAILED"
+          echo "❌ Node Test Status: FAILED" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+
+    - name: Skipping test
+      id: skip
+      if: ${{ fromJson(inputs.config-json).TESTING == 'false' }}
+      shell: bash
+      run: |
+        echo "Skipping test..."
+        echo "✅ Skipping test... To activate testing set 'TESTING' to true in your workflow_config.yml file."
+        echo "✅ Skipping test... To activate testing set 'TESTING' to true in your workflow_config.yml file." >> $GITHUB_STEP_SUMMARY
