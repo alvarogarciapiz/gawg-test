@@ -37,7 +37,7 @@ runs:
           exit 1
         fi
         echo ""
-        echo ${{ fromJson(inputs.config-json).TESTING }}
+        echo "${{ fromJson(inputs.config-json).TESTING }}"
 
     - name: Set-up JAVA environment
       if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'enabled' }}
