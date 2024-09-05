@@ -16,6 +16,11 @@ inputs:
     description: 'JSON string containing workflow config parameters.'
     required: true
 
+outputs:
+  testing-enabled:
+    description: 'Status of testing.'
+    value: ${{ steps.check-testing.outputs.testing-enabled }}
+
 
 runs:
   using: "composite"
@@ -27,10 +32,8 @@ runs:
         echo ""
         echo "========================================= CHECK TESTING =========================================="
         echo "Your workflow_configuration is:"
-        a =$(echo ${{ fromJson(inputs.config-json).TESTING }})
-        echo $a
+        echo "testing-enabled=$(echo ${{ fromJson(inputs.config-json).TESTING }})" >> $GITHUB_OUTPUT
         echo "==============================="
-        echo "testing-enabled=disabled" >> $GITHUB_OUTPUT
         # if [[ ${{ fromJson(inputs.config-json).TESTING }} == 'enabled' ]]; then
         #   echo "✅ Testing is enabled."
         #   echo "testing-enabled=enabled" >> $GITHUB_OUTPUT
