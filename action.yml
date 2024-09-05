@@ -37,9 +37,10 @@ runs:
           exit 1
         fi
         echo ""
+        echo ${{ fromJson(inputs.config-json).TESTING }}
 
     - name: Set-up JAVA environment
-      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'true' }}
+      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == "true" }}
       uses: actions/setup-java@v4
       with:
         distribution: ${{ fromJson(inputs.config-json).JAVA_DISTRIBUTION }}
@@ -47,7 +48,7 @@ runs:
 
     - name: Test maven project
       id: test-maven
-      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == 'true' }}
+      if: ${{ inputs.technology == 'maven' && fromJson(inputs.config-json).TESTING == "true" }}
       shell: bash
       run: |
         echo "Testing maven project..."
@@ -64,14 +65,14 @@ runs:
         fi
 
     - name: Set-up Python environment
-      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == 'true' }}
+      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == "true" }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ fromJson(inputs.config-json).PYTHON_VERSION }}
 
     - name: Test python project
       id: test-python
-      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == 'true' }}
+      if: ${{ inputs.technology == 'python' && fromJson(inputs.config-json).TESTING == "true" }}
       shell: bash
       run: |
         echo "Testing python project..."
@@ -88,14 +89,14 @@ runs:
         fi
 
     - name: Set-up Node environment
-      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == 'true' }}
+      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == "true" }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ fromJson(inputs.config-json).NODE_VERSION }} 
 
     - name: Test node project
       id: test-node
-      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == 'true' }}
+      if: ${{ inputs.technology == 'node' && fromJson(inputs.config-json).TESTING == "true" }}
       shell: bash
       run: |
         echo "Testing node project..."
