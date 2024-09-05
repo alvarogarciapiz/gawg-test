@@ -16,16 +16,30 @@ inputs:
     description: 'JSON string containing workflow config parameters.'
     required: true
 
-  testing-enabled:
-    type: string
-    description: 'Enable or disable testing.'
-    default: 'enabled'
 
 runs:
   using: "composite"
   steps:
+    - name: Check testing
+      id: check-testing
+      shell: bash
+      run: |
+        echo ""
+        echo "========================================= CHECK TESTING =========================================="
+        echo "Your workflow_configuration is:"
+        echo ${{ inputs.config-json }}
+        echo "==============================="
+        if [[ ${{ fromJson(inputs.config-json).TESTING }} == 'enabled' ]]; then
+          echo "✅ Testing is enabled."
+          echo "testing-enabled=enabled" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Testing is disabled. To enable testing set 'TESTING' to 'enabled' in your workflow_config.yml file."
+          echo "testing-enabled=disabled" >> $GITHUB_OUTPUT
+        fi
+        echo ""
+
     - name: Validate technology
-      if: ${{ inputs.testing-enabled == 'enabled' }}
+      if: ${{ steps.check-testing.outputs.testing-enabled == 'enabled' }}
       shell: bash
       run: |
         echo ""
@@ -43,10 +57,9 @@ runs:
           exit 1
         fi
         echo ""
-        echo "${{ inputs.testing-enabled }}"
 
     - name: Set-up JAVA environment
-      if: ${{ inputs.technology == 'maven' && inputs.testing-enabled == 'enabled' }}
+      if: ${{ inputs.technology == 'maven' && steps.check-testing.outputs.testing-enabled == 'enabled' }}
       uses: actions/setup-java@v4
       with:
         distribution: ${{ fromJson(inputs.config-json).JAVA_DISTRIBUTION }}
@@ -54,7 +67,7 @@ runs:
 
     - name: Test maven project
       id: test-maven
-      if: ${{ inputs.technology == 'maven' && inputs.testing-enabled == 'enabled' }}
+      if: ${{ inputs.technology == 'maven' && steps.check-testing.outputs.testing-enabled == 'enabled' }}
       shell: bash
       run: |
         echo "Testing maven project..."
@@ -71,14 +84,14 @@ runs:
         fi
 
     - name: Set-up Python environment
-      if: ${{ inputs.technology == 'python' && inputs.testing-enabled == 'enabled' }}
+      if: ${{ inputs.technology == 'python' && steps.check-testing.outputs.testing-enabled == 'enabled' }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ fromJson(inputs.config-json).PYTHON_VERSION }}
 
     - name: Test python project
       id: test-python
-      if: ${{ inputs.technology == 'python' && inputs.testing-enabled == 'enabled' }}
+      if: ${{ inputs.technology == 'python' && steps.check-testing.outputs.testing-enabled == 'enabled' }}
       shell: bash
       run: |
         echo "Testing python project..."
@@ -95,14 +108,14 @@ runs:
         fi
 
     - name: Set-up Node environment
-      if: ${{ inputs.technology == 'node' && inputs.testing-enabled == 'enabled' }}
+      if: ${{ inputs.technology == 'node' && steps.check-testing.outputs.testing-enabled == 'enabled' }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ fromJson(inputs.config-json).NODE_VERSION }} 
 
     - name: Test node project
       id: test-node
-      if: ${{ inputs.technology == 'node' && inputs.testing-enabled == 'enabled' }}
+      if: ${{ inputs.technology == 'node' && steps.check-testing.outputs.testing-enabled == 'enabled' }}
       shell: bash
       run: |
         echo "Testing node project..."
@@ -121,7 +134,7 @@ runs:
 
     - name: Skipping test
       id: skip
-      if: ${{ inputs.testing-enabled == 'disabled' }}
+      if: ${{ steps.check-testing.outputs.testing-enabled == 'disabled' }}
       shell: bash
       run: |
         echo "Skipping test..."
