@@ -27,7 +27,8 @@ runs:
         echo ""
         echo "========================================= CHECK TESTING =========================================="
         echo "Your workflow_configuration is:"
-        echo "${{ inputs.config-json }}"
+        a =$(echo ${{ fromJson(inputs.config-json).TESTING }})
+        echo $a
         echo "==============================="
         echo "testing-enabled=disabled" >> $GITHUB_OUTPUT
         # if [[ ${{ fromJson(inputs.config-json).TESTING }} == 'enabled' ]]; then
