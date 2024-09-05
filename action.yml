@@ -19,7 +19,6 @@ inputs:
   testing-enabled:
     type: string
     description: 'Enable or disable testing.'
-    required: true
     default: 'disabled'
 
 runs:
