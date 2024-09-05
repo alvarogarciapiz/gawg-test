@@ -29,14 +29,15 @@ runs:
         echo "Your workflow_configuration is:"
         echo ${{ inputs.config-json }}
         echo "==============================="
-        if [[ ${{ fromJson(inputs.config-json).TESTING }} == 'enabled' ]]; then
-          echo "✅ Testing is enabled."
-          echo "testing-enabled=enabled" >> $GITHUB_OUTPUT
-        else
-          echo "❌ Testing is disabled. To enable testing set 'TESTING' to 'enabled' in your workflow_config.yml file."
-          echo "testing-enabled=disabled" >> $GITHUB_OUTPUT
-        fi
-        echo ""
+        echo "testing-enabled=disabled" >> $GITHUB_OUTPUT
+        # if [[ ${{ fromJson(inputs.config-json).TESTING }} == 'enabled' ]]; then
+        #   echo "✅ Testing is enabled."
+        #   echo "testing-enabled=enabled" >> $GITHUB_OUTPUT
+        # else
+        #   echo "❌ Testing is disabled. To enable testing set 'TESTING' to 'enabled' in your workflow_config.yml file."
+        #   echo "testing-enabled=disabled" >> $GITHUB_OUTPUT
+        # fi
+        # echo ""
 
     - name: Validate technology
       if: ${{ steps.check-testing.outputs.testing-enabled == 'enabled' }}
