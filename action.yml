@@ -19,12 +19,13 @@ inputs:
   testing-enabled:
     type: string
     description: 'Enable or disable testing.'
-    default: 'disabled'
+    default: 'enabled'
 
 runs:
   using: "composite"
   steps:
     - name: Validate technology
+      if: ${{ inputs.testing-enabled == 'enabled' }}
       shell: bash
       run: |
         echo ""
@@ -124,5 +125,5 @@ runs:
       shell: bash
       run: |
         echo "Skipping test..."
-        echo "✅ Skipping test... To activate testing set 'TESTING' to true in your workflow_config.yml file."
-        echo "✅ Skipping test... To activate testing set 'TESTING' to true in your workflow_config.yml file." >> $GITHUB_STEP_SUMMARY
+        echo "✅ Skipping test... To activate testing set 'TESTING' to 'enabled' in your workflow_config.yml file."
+        echo "✅ Skipping test... To activate testing set 'TESTING' to 'enabled' in your workflow_config.yml file." >> $GITHUB_STEP_SUMMARY
