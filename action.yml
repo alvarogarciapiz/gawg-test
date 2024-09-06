@@ -28,8 +28,6 @@ runs:
         TECHNOLOGIES=("python" "node" "maven")
         if [[ " ${TECHNOLOGIES[@]} " =~ " ${{ inputs.technology }} " ]]; then
           echo "✅ ${{ inputs.technology }} is a valid technology."
-          echo "## Test status information" >> $GITHUB_STEP_SUMMARY
-          echo "✅ ${{ inputs.technology }} technology validation PASSED." >> $GITHUB_STEP_SUMMARY
         else
           echo "❌ Error: ${{ inputs.technology }} is not a valid technology."
           echo "::error:: ❌ Error: ${{ inputs.technology }} is not a valid technology."
@@ -57,7 +55,6 @@ runs:
         echo "$output"
         if [ $status -eq 0 ]; then
           echo "✅ Maven Test Status: SUCCESS"
-          echo "✅ Maven Test Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
         else
           echo "❌ Maven Test Status: FAILED"
           echo "❌ Maven Test Status: FAILED" >> $GITHUB_STEP_SUMMARY
@@ -81,7 +78,6 @@ runs:
         echo "$output"
         if [ $status -eq 0 ]; then
           echo "✅ Python Test Status: SUCCESS"
-          echo "✅ Python Test Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
         else
           echo "❌ Python Test Status: FAILED"
           echo "❌ Python Test Status: FAILED" >> $GITHUB_STEP_SUMMARY
@@ -106,7 +102,6 @@ runs:
         echo "$output"
         if [ $status -eq 0 ]; then
           echo "✅ Node Test Status: SUCCESS"
-          echo "✅ Node Test Status: SUCCESS" >> $GITHUB_STEP_SUMMARY
         else
           echo "❌ Node Test Status: FAILED"
           echo "❌ Node Test Status: FAILED" >> $GITHUB_STEP_SUMMARY
@@ -120,4 +115,3 @@ runs:
       run: |
         echo "Skipping test..."
         echo "✅ Skipping test... To activate testing set 'TESTING' to 'enabled' in your workflow_config.yml file."
-        echo "✅ Skipping test... To activate testing set 'TESTING' to 'enabled' in your workflow_config.yml file." >> $GITHUB_STEP_SUMMARY
